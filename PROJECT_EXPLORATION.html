@@ -1,0 +1,698 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Project Exploration - retrieval-backend-with-rag</title>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <script>mermaid.initialize({ startOnLoad: true, theme: "neutral" });</script>
+  <style>
+    :root {
+      --blue: #0066cc;
+      --blue-dark: #2997ff;
+      --ink: #1d1d1f;
+      --muted: #6e6e73;
+      --canvas: #ffffff;
+      --parchment: #f5f5f7;
+      --pearl: #fafafc;
+      --dark: #272729;
+      --dark-2: #2a2a2c;
+      --hairline: #e0e0e0;
+      --soft: #f0f0f0;
+      --max: 1120px;
+    }
+
+    * { box-sizing: border-box; }
+
+    html {
+      scroll-behavior: smooth;
+      background: var(--canvas);
+      color: var(--ink);
+      font-family: "SF Pro Text", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      letter-spacing: 0;
+    }
+
+    body {
+      margin: 0;
+      font-size: 17px;
+      line-height: 1.47;
+    }
+
+    a { color: var(--blue); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    .nav {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      height: 44px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #000;
+      color: #fff;
+      font-size: 12px;
+    }
+
+    .nav-inner {
+      width: min(var(--max), calc(100% - 32px));
+      display: flex;
+      justify-content: space-between;
+      gap: 20px;
+      align-items: center;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 22px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .nav a { color: #fff; opacity: .88; }
+
+    .subnav {
+      position: sticky;
+      top: 44px;
+      z-index: 9;
+      min-height: 52px;
+      background: rgba(245, 245, 247, .86);
+      backdrop-filter: saturate(180%) blur(20px);
+      border-bottom: 1px solid rgba(0, 0, 0, .08);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .subnav-inner {
+      width: min(var(--max), calc(100% - 32px));
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+
+    .brand {
+      font-size: 21px;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      min-height: 44px;
+      padding: 11px 22px;
+      border-radius: 999px;
+      background: var(--blue);
+      color: #fff;
+      font-size: 17px;
+      line-height: 1;
+    }
+
+    .hero, section {
+      display: flex;
+      justify-content: center;
+      padding: 80px 24px;
+    }
+
+    .hero {
+      min-height: calc(100vh - 96px);
+      align-items: center;
+      background: var(--canvas);
+    }
+
+    .wrap { width: min(var(--max), 100%); }
+
+    .hero h1 {
+      max-width: 920px;
+      margin: 0;
+      font-family: "SF Pro Display", system-ui, -apple-system, sans-serif;
+      font-size: clamp(40px, 7vw, 72px);
+      line-height: 1.07;
+      font-weight: 600;
+      letter-spacing: 0;
+    }
+
+    .lead {
+      max-width: 840px;
+      margin: 24px 0 0;
+      font-family: "SF Pro Display", system-ui, -apple-system, sans-serif;
+      font-size: clamp(22px, 3vw, 28px);
+      line-height: 1.25;
+      color: var(--muted);
+    }
+
+    .meta-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 32px;
+    }
+
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      min-height: 34px;
+      padding: 8px 14px;
+      border-radius: 999px;
+      background: var(--pearl);
+      border: 1px solid var(--hairline);
+      color: var(--ink);
+      font-size: 14px;
+    }
+
+    section.parchment { background: var(--parchment); }
+    section.dark { background: var(--dark); color: #fff; }
+    section.dark a { color: var(--blue-dark); }
+    section.dark .muted, section.dark .section-kicker { color: #ccc; }
+
+    h2 {
+      margin: 0 0 24px;
+      font-family: "SF Pro Display", system-ui, -apple-system, sans-serif;
+      font-size: clamp(32px, 4vw, 48px);
+      line-height: 1.1;
+      font-weight: 600;
+      letter-spacing: 0;
+    }
+
+    h3 {
+      margin: 32px 0 12px;
+      font-size: 21px;
+      line-height: 1.2;
+      font-weight: 600;
+      letter-spacing: 0;
+    }
+
+    p { margin: 0 0 16px; }
+    .muted { color: var(--muted); }
+    .section-kicker {
+      margin-bottom: 12px;
+      color: var(--muted);
+      font-size: 14px;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 16px;
+    }
+
+    .grid.two { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+
+    .tile {
+      border: 1px solid var(--hairline);
+      border-radius: 8px;
+      padding: 24px;
+      background: var(--canvas);
+    }
+
+    .dark .tile {
+      background: var(--dark-2);
+      border-color: rgba(255, 255, 255, .12);
+    }
+
+    .tile h3 { margin-top: 0; }
+
+    ul, ol { padding-left: 22px; margin: 0 0 20px; }
+    li { margin: 7px 0; }
+
+    code {
+      padding: 2px 6px;
+      border-radius: 5px;
+      background: rgba(0, 0, 0, .06);
+      font-size: .92em;
+    }
+
+    .dark code { background: rgba(255, 255, 255, .12); }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 18px 0 28px;
+      font-size: 15px;
+      background: var(--canvas);
+    }
+
+    th, td {
+      padding: 12px 14px;
+      border-bottom: 1px solid var(--hairline);
+      text-align: left;
+      vertical-align: top;
+    }
+
+    th {
+      font-weight: 600;
+      background: var(--parchment);
+    }
+
+    .dark table { background: transparent; color: #fff; }
+    .dark th { background: rgba(255, 255, 255, .08); }
+    .dark th, .dark td { border-color: rgba(255, 255, 255, .16); }
+
+    .diagram {
+      overflow-x: auto;
+      border: 1px solid var(--hairline);
+      border-radius: 8px;
+      background: #fff;
+      padding: 16px;
+      margin: 18px 0 32px;
+    }
+
+    pre.mermaid {
+      margin: 0;
+      min-width: 680px;
+    }
+
+    .note {
+      border-left: 3px solid var(--blue);
+      padding: 10px 0 10px 16px;
+      margin: 18px 0;
+      color: var(--muted);
+    }
+
+    footer {
+      background: var(--parchment);
+      padding: 64px 24px;
+      color: #333;
+      font-size: 12px;
+    }
+
+    footer .wrap { display: grid; gap: 12px; }
+
+    @media (max-width: 833px) {
+      .nav-links { display: none; }
+      .subnav-inner { align-items: flex-start; flex-direction: column; padding: 10px 0; }
+      .grid, .grid.two { grid-template-columns: 1fr; }
+      .hero, section { padding: 56px 18px; }
+      .hero { min-height: auto; }
+      table { font-size: 14px; }
+    }
+  </style>
+</head>
+<body>
+  <nav class="nav">
+    <div class="nav-inner">
+      <a href="#overview">retrieval-backend-with-rag</a>
+      <div class="nav-links">
+        <a href="#architecture">Architecture</a>
+        <a href="#workflow">Workflow</a>
+        <a href="#files">Key Files</a>
+        <a href="#testing">Testing</a>
+        <a href="#risks">Risks</a>
+      </div>
+    </div>
+  </nav>
+
+  <div class="subnav">
+    <div class="subnav-inner">
+      <div class="brand">Project Exploration</div>
+      <a class="pill" href="#evidence">Evidence Sources</a>
+    </div>
+  </div>
+
+  <main>
+    <header class="hero" id="overview">
+      <div class="wrap">
+        <div class="section-kicker">E1 Project Exploration</div>
+        <h1>Vietnamese RAG backend cho product Q&amp;A, semantic routing, LLM inference và evaluation.</h1>
+        <p class="lead">Báo cáo này dùng CodeGraph và Understand-Anything index làm nguồn chính, đọc thêm docs/config/test/code trọng yếu. Setup guide bên dưới là suy luận từ repo, chưa được chạy thật trong session này.</p>
+        <div class="meta-row">
+          <span class="chip">Generated: 2026-06-11T18:46:26+07:00</span>
+          <span class="chip">Commit: 20c769a80e03b230c73fd7f5214e88001fcb4a82</span>
+          <span class="chip">CodeGraph: 36 files, 433 nodes, 666 edges</span>
+          <span class="chip">UA graph: 50 analyzed files</span>
+        </div>
+      </div>
+    </header>
+
+    <section class="parchment">
+      <div class="wrap">
+        <div class="section-kicker">Project Overview</div>
+        <h2>Dự án giải quyết vấn đề gì</h2>
+        <div class="grid">
+          <div class="tile">
+            <h3>Mục tiêu</h3>
+            <p>Repo xây một backend RAG tiếng Việt cho chatbot tư vấn sản phẩm điện thoại. Khi câu hỏi liên quan product catalog, hệ thống retrieval dữ liệu sản phẩm, rerank passages, rồi dùng LLM sinh câu trả lời.</p>
+          </div>
+          <div class="tile">
+            <h3>Final goal</h3>
+            <p>Tạo một API backend có thể nhận chat messages, phân loại intent, truy xuất product knowledge từ vector DB, và trả về message assistant theo format client mong đợi.</p>
+          </div>
+          <div class="tile">
+            <h3>Audience</h3>
+            <p>Người học AI Engineering cần hiểu một pipeline RAG thực tế: embeddings, vector search, reranking, prompt construction, LLM adapters, evaluation và benchmark.</p>
+          </div>
+        </div>
+
+        <h3>Inputs và outputs</h3>
+        <table>
+          <thead><tr><th>Loại</th><th>Chi tiết</th></tr></thead>
+          <tbody>
+            <tr><td>API input</td><td><code>POST /api/search</code> nhận JSON array chat messages, ví dụ <code>[{"role":"user","content":"..." }]</code>.</td></tr>
+            <tr><td>Data input</td><td>CSV product catalog, nổi bật là <code>hoanghamobile.csv</code> với 2,994 dòng gồm <code>_id</code>, <code>title</code>, <code>product_specs</code>, <code>current_price</code>, promotion và color options.</td></tr>
+            <tr><td>Runtime output</td><td>JSON <code>{"content": response, "role": "assistant"}</code>.</td></tr>
+            <tr><td>Artifacts</td><td>Local Chroma collection trong <code>./chroma_db</code>, benchmark CSV outputs, evaluation logs trong test folders nếu chạy test/benchmark.</td></tr>
+          </tbody>
+        </table>
+
+        <h3>Main features</h3>
+        <ul>
+          <li>Flask API với CORS cho chatbot client.</li>
+          <li>Semantic router tách route <code>products</code> và <code>chitchat</code>.</li>
+          <li>Reflection layer rewrite chat history thành standalone Vietnamese query.</li>
+          <li>RAG layer hỗ trợ <code>chromadb</code>, MongoDB Atlas Vector Search và Qdrant.</li>
+          <li>Reranker dùng CrossEncoder để sắp xếp lại passages.</li>
+          <li>LLM facade hỗ trợ Gemini, OpenAI, Together, Ollama, vLLM, Hugging Face và ONNX.</li>
+          <li>Evaluation gồm Hit@K, nDCG, BLEU, ROUGE và latency benchmark.</li>
+        </ul>
+      </div>
+    </section>
+
+    <section id="architecture">
+      <div class="wrap">
+        <div class="section-kicker">Architecture</div>
+        <h2>System design</h2>
+        <p>Understand-Anything chia repo thành bốn layer: RAG Runtime, Evaluation and Tests, Project Support và Project Misc. CodeGraph xác nhận entry point chính là <code>serve.py</code>, class lõi là <code>RAG</code>, cùng các modules embeddings, LLMs, rerank, reflection và semantic router.</p>
+
+        <div class="diagram">
+          <pre class="mermaid">
+flowchart TB
+  Client[Chatbot client] --> API[Flask serve.py<br/>POST /api/search]
+  API --> Reflection[Reflection<br/>standalone Vietnamese query]
+  Reflection --> Router[SemanticRouter<br/>products or chitchat]
+  Router -->|products| RAG[RAG vector_search]
+  RAG --> VectorDB[(ChromaDB<br/>MongoDB<br/>Qdrant)]
+  RAG --> Reranker[CrossEncoder Reranker]
+  Reranker --> Prompt[Sales prompt with ranked product context]
+  Prompt --> LLM[LLMs facade]
+  Router -->|chitchat| LLM
+  LLM --> Response[assistant JSON response]
+          </pre>
+        </div>
+
+        <h3>Module dependency map</h3>
+        <div class="diagram">
+          <pre class="mermaid">
+flowchart LR
+  Serve[serve.py] --> Semantic[semantic_router]
+  Serve --> Reflection[reflection]
+  Serve --> RAGCore[rag/core.py]
+  Serve --> Rerank[re_rank]
+  Serve --> LLMs[llms]
+  Serve --> Ingest[insert_data]
+  RAGCore --> Embeddings[embeddings]
+  RAGCore --> Stores[Vector stores]
+  RAGCore --> LLMs
+  Semantic --> Embeddings
+  LLMs --> Online[onlinesLlms.py]
+  LLMs --> Local[localLlms.py]
+  Local --> ONNX[onnx.py]
+  Tests[test and benchmark] --> Serve
+  Tests --> RAGCore
+  Tests --> Rerank
+  Tests --> LLMs
+          </pre>
+        </div>
+
+        <h3>Tech stack và dependencies chính</h3>
+        <table>
+          <thead><tr><th>Nhóm</th><th>Dependencies / files</th><th>Vai trò</th></tr></thead>
+          <tbody>
+            <tr><td>Runtime</td><td>Python 3.12, <code>uv</code>, Flask, flask-cors</td><td>Chạy API backend.</td></tr>
+            <tr><td>Validation/config</td><td>Pydantic v1 import path, python-dotenv</td><td>Embedding config và env loading.</td></tr>
+            <tr><td>Embeddings</td><td>sentence-transformers, fastembed, OpenAI, Google Vertex, Mistral</td><td>Encode route samples, queries và documents.</td></tr>
+            <tr><td>Vector DB</td><td>ChromaDB, pymongo, qdrant-client</td><td>Persistent local vector store hoặc managed vector search.</td></tr>
+            <tr><td>LLM</td><td>google-generativeai, openai, mistralai, transformers, onnxruntime</td><td>Online/offline answer generation và reflection.</td></tr>
+            <tr><td>Evaluation</td><td>ragas, sacrebleu, pandas, unittest</td><td>BLEU, ROUGE, Hit@K, nDCG, benchmark CSV.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="dark" id="workflow">
+      <div class="wrap">
+        <div class="section-kicker">End-to-End Workflow</div>
+        <h2>Request, data và control flow</h2>
+        <ol>
+          <li>Client gửi chat history tới <code>POST /api/search</code>.</li>
+          <li><code>Reflection</code> dùng LLM rewrite câu hỏi cuối thành standalone Vietnamese query.</li>
+          <li><code>SemanticRouter.guide()</code> embed query và so sánh với sample embeddings của route <code>products</code>/<code>chitchat</code>.</li>
+          <li>Nếu là <code>products</code>, <code>RAG.vector_search()</code> tìm documents từ vector DB đã chọn.</li>
+          <li><code>Reranker</code> rerank passages, sau đó <code>serve.py</code> ghép prompt tư vấn bán hàng kèm context.</li>
+          <li><code>LLMs.generate_content()</code> gọi backend model tương ứng.</li>
+          <li>API trả về message assistant.</li>
+        </ol>
+
+        <div class="diagram">
+          <pre class="mermaid">
+sequenceDiagram
+  participant C as Client
+  participant S as serve.py
+  participant RF as Reflection
+  participant RT as SemanticRouter
+  participant R as RAG
+  participant V as Vector DB
+  participant RR as Reranker
+  participant L as LLM
+  C->>S: POST /api/search messages[]
+  S->>RF: chat history
+  RF->>L: rewrite prompt
+  L-->>RF: standalone query
+  RF-->>S: query
+  S->>RT: guide(query)
+  alt products
+    S->>R: vector_search(query)
+    R->>V: query embedding
+    V-->>R: candidate docs
+    R-->>S: passages
+    S->>RR: rerank(query, passages)
+    RR-->>S: ranked passages
+    S->>L: sales prompt with context
+  else chitchat
+    S->>L: original chat messages
+  end
+  L-->>S: generated text
+  S-->>C: {content, role}
+          </pre>
+        </div>
+
+        <h3>Data ingestion flow cho ChromaDB</h3>
+        <div class="diagram">
+          <pre class="mermaid">
+flowchart LR
+  CSV[CSV files in data/] --> Loader[load_csv_to_chromadb]
+  Loader --> Combine[combined_information column]
+  Combine --> Embed[SentenceTransformer embeddings]
+  Embed --> Chroma[(./chroma_db collection)]
+  Chroma --> RAG[RAG.vector_search at runtime]
+          </pre>
+        </div>
+
+        <p class="muted">MongoDB và Qdrant không có ingestion script tương đương trong flow đã đọc; chúng được giả định là đã có collection/index và credentials trước khi chạy backend.</p>
+      </div>
+    </section>
+
+    <section class="parchment" id="files">
+      <div class="wrap">
+        <div class="section-kicker">Repository Organization</div>
+        <h2>Folders, modules và key files</h2>
+        <table>
+          <thead><tr><th>Path</th><th>Responsibility</th></tr></thead>
+          <tbody>
+            <tr><td><code>serve.py</code></td><td>Main Flask runtime, CLI args, env mapping, semantic router setup, RAG setup, reranker setup, HTTP handler.</td></tr>
+            <tr><td><code>rag/core.py</code></td><td>RAG abstraction cho ChromaDB, MongoDB và Qdrant; query embedding; vector search; delegation sang LLM.</td></tr>
+            <tr><td><code>semantic_router/</code></td><td>Route object, semantic samples tiếng Việt, cosine-like route selection.</td></tr>
+            <tr><td><code>reflection/core.py</code></td><td>Rewrite chat history thành standalone Vietnamese question trước routing.</td></tr>
+            <tr><td><code>re_rank/core.py</code></td><td>CrossEncoder reranker trả ranked scores và passages.</td></tr>
+            <tr><td><code>embeddings/</code></td><td>Base embedding contract và wrappers cho SentenceTransformer, FastEmbed, OpenAI, Google, Mistral.</td></tr>
+            <tr><td><code>llms/</code></td><td>Facade và adapters cho online/local LLM backends, gồm ONNX generation wrapper.</td></tr>
+            <tr><td><code>insert_data/build_chromadb.py</code></td><td>CSV to ChromaDB ingestion utility.</td></tr>
+            <tr><td><code>benchmark_inference_time_*.py</code></td><td>Latency benchmark cho LLM-only và full pipeline.</td></tr>
+            <tr><td><code>test/</code></td><td>Unit/integration-style tests cho API, vector search, rerank, reflection, LLM answer metrics.</td></tr>
+            <tr><td><code>pyproject.toml</code>, <code>requirements.txt</code></td><td>Project metadata, Python version requirement và dependency list.</td></tr>
+            <tr><td><code>README_old.md</code></td><td>Human docs: architecture screenshots, setup, env vars, run commands, evaluation commands.</td></tr>
+            <tr><td><code>AGENTS.md</code>, <code>workfollow.md</code></td><td>Repo workflow/context docs. UA graph still references deleted <code>AGENT.md</code>.</td></tr>
+            <tr><td><code>hoanghamobile.csv</code></td><td>Product catalog data source with phone specs/prices/promotions.</td></tr>
+            <tr><td><code>index.html</code></td><td>Indexed as markup, but current content appears to be product-spec text rather than a full UI.</td></tr>
+          </tbody>
+        </table>
+
+        <h3>20 key files for onboarding</h3>
+        <ol>
+          <li><code>README_old.md</code></li>
+          <li><code>pyproject.toml</code></li>
+          <li><code>requirements.txt</code></li>
+          <li><code>serve.py</code></li>
+          <li><code>rag/core.py</code></li>
+          <li><code>semantic_router/router.py</code></li>
+          <li><code>semantic_router/route.py</code></li>
+          <li><code>semantic_router/samples.py</code></li>
+          <li><code>reflection/core.py</code></li>
+          <li><code>re_rank/core.py</code></li>
+          <li><code>embeddings/base.py</code></li>
+          <li><code>embeddings/sentenceTransformer.py</code></li>
+          <li><code>insert_data/build_chromadb.py</code></li>
+          <li><code>llms/llms.py</code></li>
+          <li><code>llms/onlinesLlms.py</code></li>
+          <li><code>llms/localLlms.py</code></li>
+          <li><code>llms/onnx.py</code></li>
+          <li><code>benchmark_inference_time_pipeline.py</code></li>
+          <li><code>test/unitTest/test_rerank_ncdg.py</code></li>
+          <li><code>test/integrationTest/llm-answer/test_bleu.py</code></li>
+        </ol>
+      </div>
+    </section>
+
+    <section>
+      <div class="wrap">
+        <div class="section-kicker">Setup Guide</div>
+        <h2>Guide suy luận, chưa chạy thật</h2>
+        <p class="note">Các bước dưới đây được suy luận từ <code>README_old.md</code>, <code>pyproject.toml</code>, <code>requirements.txt</code> và code. Trong E1 này không chạy app, không install dependencies, không start server, không chạy runtime tests.</p>
+
+        <h3>1. Chuẩn bị Python và dependencies</h3>
+        <ol>
+          <li>Dùng Python <code>3.12</code>, khớp <code>.python-version</code> và <code>pyproject.toml</code>.</li>
+          <li>Theo README, dependency setup dự kiến là <code>uv sync</code>.</li>
+        </ol>
+
+        <h3>2. Tạo env vars theo backend cần dùng</h3>
+        <table>
+          <thead><tr><th>Use case</th><th>Env vars</th></tr></thead>
+          <tbody>
+            <tr><td>Gemini</td><td><code>GEMINI_API_KEY</code></td></tr>
+            <tr><td>OpenAI</td><td><code>OPENAI_API_KEY</code></td></tr>
+            <tr><td>Together</td><td><code>TOGETHER_API_KEY</code>, <code>TOGETHER_BASE_URL</code></td></tr>
+            <tr><td>Ollama</td><td><code>OLLAMA_BASE_URL</code></td></tr>
+            <tr><td>vLLM</td><td><code>VLLM_BASE_URL</code></td></tr>
+            <tr><td>MongoDB</td><td>Code dùng <code>MONGODB_URI</code>, <code>MONGODB_NAME</code>, <code>MONGODB_COLLECTION</code>; README lại ghi <code>DB_NAME</code>, <code>DB_COLLECTION</code>, nên cần chuẩn hóa trước khi chạy.</td></tr>
+            <tr><td>Qdrant</td><td><code>QDRANT_API</code>, <code>QDRANT_URL</code></td></tr>
+          </tbody>
+        </table>
+
+        <h3>3. Chuẩn bị data/vector DB</h3>
+        <ul>
+          <li>ChromaDB: đặt CSV hợp lệ trong <code>data/</code>; khi collection chưa tồn tại, <code>serve.py</code> sẽ gọi ingestion trước khi serve.</li>
+          <li>MongoDB: cần Atlas Vector Search index tên <code>vector_index</code>.</li>
+          <li>Qdrant: cần collection tương ứng với tên embedding model, thường là phần cuối của model id.</li>
+        </ul>
+
+        <h3>4. Run commands theo docs</h3>
+        <table>
+          <thead><tr><th>Mode</th><th>Command trong docs</th></tr></thead>
+          <tbody>
+            <tr><td>OpenAI online</td><td><code>uv run serve.py --mode online --model_name openai --model_version gpt-4o</code></td></tr>
+            <tr><td>Gemini online</td><td><code>uv run serve.py --mode online --model_name gemini --model_version gemini-2.0-flash</code></td></tr>
+            <tr><td>Ollama offline</td><td><code>uv run serve.py --mode offline --model_engine ollama --model_version mistralai/Mistral-7B-Instruct-v0.2</code></td></tr>
+            <tr><td>Hugging Face offline</td><td><code>uv run serve.py --mode offline --model_engine huggingface --model_version mistralai/Mistral-7B-Instruct-v0.2</code></td></tr>
+            <tr><td>ONNX offline</td><td><code>uv run serve.py --mode offline --model_name TinyLLama --model_engine onnx --model_version onnx-community/TinyLLama-v0-ONNX</code></td></tr>
+          </tbody>
+        </table>
+
+        <h3>Setup flow</h3>
+        <div class="diagram">
+          <pre class="mermaid">
+flowchart TB
+  Start[Clone repo] --> Python[Python 3.12]
+  Python --> Sync[uv sync]
+  Sync --> Env[Create .env for selected LLM and DB]
+  Env --> Data{Vector DB}
+  Data -->|chromadb| CSV[Put CSV in data/]
+  Data -->|mongodb| Atlas[Create vector_index]
+  Data -->|qdrant| Qdrant[Prepare collection]
+  CSV --> Run[uv run serve.py ...]
+  Atlas --> Run
+  Qdrant --> Run
+  Run --> API[POST /api/search]
+          </pre>
+        </div>
+      </div>
+    </section>
+
+    <section class="dark" id="testing">
+      <div class="wrap">
+        <div class="section-kicker">Testing Strategy</div>
+        <h2>Tests và evaluation</h2>
+        <p>Test suite trong repo đo nhiều lớp của RAG system nhưng phần lớn là integration-heavy: cần model thật, API server thật, vector DB thật, network hoặc credentials. Vì vậy chúng hữu ích cho evaluation, nhưng chưa phải unit tests cô lập hoàn toàn.</p>
+
+        <table>
+          <thead><tr><th>Area</th><th>Files</th><th>Điều đo được</th></tr></thead>
+          <tbody>
+            <tr><td>API response</td><td><code>test/unitTest/test_api_response.py</code></td><td>Gửi request tới <code>localhost:5002/api/search</code>.</td></tr>
+            <tr><td>Chroma retrieval</td><td><code>test_chromadb_vector_search.py</code></td><td>Tải CSV bằng <code>gdown</code>, build ChromaDB, assert top IDs.</td></tr>
+            <tr><td>Mongo/Qdrant retrieval</td><td><code>test_hit@k_mongodb.py</code>, <code>test_hit@k_qdrant.py</code></td><td>Hit@1 trên benchmark CSV.</td></tr>
+            <tr><td>Reflection</td><td><code>test_reflection.py</code></td><td>Kiểm tra các online LLM trả string cho query rewrite.</td></tr>
+            <tr><td>Rerank</td><td><code>test_rerank_ncdg.py</code></td><td>Exact match và average nDCG, threshold nDCG &gt; 0.7 và exact accuracy &gt; 0.3.</td></tr>
+            <tr><td>Answer quality</td><td><code>test_bleu.py</code>, <code>test_rouge.py</code></td><td>Gọi API thật và tính BLEU/ROUGE bằng RAGAS.</td></tr>
+            <tr><td>Latency</td><td><code>benchmark_inference_time_llms.py</code>, <code>benchmark_inference_time_pipeline.py</code></td><td>Thời gian LLM-only và full pipeline theo CSV.</td></tr>
+          </tbody>
+        </table>
+
+        <p class="muted">README gợi ý chạy integration tests bằng <code>uv run python -m unittest discover -s ./test/integrationTest -p "test*.py" -v</code>. Lệnh này chưa được chạy trong E1.</p>
+      </div>
+    </section>
+
+    <section>
+      <div class="wrap">
+        <div class="section-kicker">Learning Notes</div>
+        <h2>Khái niệm nên học khi onboarding</h2>
+        <div class="grid two">
+          <div class="tile">
+            <h3>RAG pipeline</h3>
+            <p>Hiểu query rewriting, semantic routing, embedding, vector search, reranking, prompt augmentation và answer generation.</p>
+          </div>
+          <div class="tile">
+            <h3>Vector stores</h3>
+            <p>So sánh local ChromaDB với managed MongoDB Atlas Vector Search và Qdrant, đặc biệt collection naming, index naming và score semantics.</p>
+          </div>
+          <div class="tile">
+            <h3>LLM adapters</h3>
+            <p>Facade pattern giúp đổi backend model, nhưng mỗi backend có side effects khác nhau: API keys, server connectivity, model downloads, GPU/CPU memory.</p>
+          </div>
+          <div class="tile">
+            <h3>Evaluation</h3>
+            <p>Hit@K/nDCG đo retrieval/rerank; BLEU/ROUGE đo lexical answer similarity; latency benchmark đo cost theo từng stage.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="parchment" id="risks">
+      <div class="wrap">
+        <div class="section-kicker">Risks and Open Questions</div>
+        <h2>Điểm chưa rõ và rủi ro kỹ thuật</h2>
+        <ul>
+          <li><code>pyproject.toml</code> khai báo <code>readme = "README.md"</code>, nhưng repo hiện chỉ có <code>README_old.md</code>.</li>
+          <li>Understand-Anything layer trỏ tới <code>document:AGENT.md</code>, nhưng worktree hiện báo <code>AGENT.md</code> đã bị delete và có <code>AGENTS.md</code> untracked.</li>
+          <li>README env vars cho MongoDB dùng <code>DB_NAME</code>/<code>DB_COLLECTION</code>, code dùng <code>MONGODB_NAME</code>/<code>MONGODB_COLLECTION</code>.</li>
+          <li>Trong <code>rag/core.py</code>, một số check dùng <code>if self._collection_exists:</code> thay vì gọi <code>self._collection_exists()</code>.</li>
+          <li>Trong <code>insert_data/build_chromadb.py</code>, check <code>combined_infomation</code> bị typo nhưng drop <code>combined_information</code>.</li>
+          <li>Tests có nhiều dependency runtime: localhost server, external APIs, Google Drive download, vector DB credentials, model downloads.</li>
+          <li><code>serve.py</code> chạy Flask với <code>debug=True</code>, phù hợp dev hơn production.</li>
+          <li><code>index.html</code> được index là markup nhưng nội dung hiện giống product specs text, cần xác minh vai trò thật.</li>
+        </ul>
+      </div>
+    </section>
+
+    <section id="evidence">
+      <div class="wrap">
+        <div class="section-kicker">Evidence Sources</div>
+        <h2>Nguồn đã dùng</h2>
+        <p>Index/tools: CodeGraph MCP (<code>status</code>, <code>context</code>, <code>files</code>, <code>search</code>, <code>callees</code>, <code>callers</code>) và Understand-Anything <code>knowledge-graph.json</code>/<code>meta.json</code>.</p>
+        <p>Docs/config/design: <code>README_old.md</code>, <code>AGENTS.md</code>, <code>workfollow.md</code>, <code>pyproject.toml</code>, <code>requirements.txt</code>, <code>.python-version</code>, <code>DESIGN-apple.md</code>.</p>
+        <p>Code/test/data đại diện: <code>serve.py</code>, <code>rag/core.py</code>, <code>semantic_router/*</code>, <code>reflection/core.py</code>, <code>re_rank/core.py</code>, <code>embeddings/*</code>, <code>llms/*</code>, <code>insert_data/build_chromadb.py</code>, benchmark scripts, selected unit/integration tests, sample CSV metadata.</p>
+        <p class="note">Không đọc toàn bộ codebase thủ công, không chạy project, không install dependency, không start server, không chạy runtime tests.</p>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="wrap">
+      <div>PROJECT_EXPLORATION.html generated for E1 Project Exploration.</div>
+      <div>Design direction: Apple-inspired typography, alternating full-width surfaces, restrained blue action color, no decorative gradients.</div>
+    </div>
+  </footer>
+</body>
+</html>

@@ -1,0 +1,352 @@
+{
+  "repo_summary": {
+    "name": "retrieval-backend-with-rag",
+    "description": "Vietnamese RAG backend and evaluation toolkit for product question answering, semantic routing, retrieval, reranking, LLM inference, benchmarks, and evaluation.",
+    "primary_runtime": "Python 3.12",
+    "api_framework": "Flask",
+    "main_entry_point": "serve.py",
+    "main_route": "POST /api/search",
+    "runtime_response_shape": {
+      "content": "generated assistant response",
+      "role": "assistant"
+    },
+    "final_goal": "Serve a chatbot backend that can route chat messages between product RAG and direct chitchat LLM response, using Vietnamese query rewriting and product data retrieval."
+  },
+  "analyzed_commit": "20c769a80e03b230c73fd7f5214e88001fcb4a82",
+  "generated_at": "2026-06-11T18:46:26+07:00",
+  "indexes": {
+    "codegraph": {
+      "present": true,
+      "files_indexed": 36,
+      "total_nodes": 433,
+      "total_edges": 666,
+      "backend": "node:sqlite"
+    },
+    "understand_anything": {
+      "present": true,
+      "knowledge_graph_path": ".understand-anything/knowledge-graph.json",
+      "meta_path": ".understand-anything/meta.json",
+      "analyzed_files": 50,
+      "analyzed_at": "2026-06-11T11:19:42.873Z",
+      "git_commit_hash": "20c769a80e03b230c73fd7f5214e88001fcb4a82"
+    }
+  },
+  "key_files": [
+    {
+      "path": "README_old.md",
+      "role": "Human setup, run, architecture, demo, and evaluation documentation."
+    },
+    {
+      "path": "pyproject.toml",
+      "role": "Project metadata, Python version, and uv dependency declaration."
+    },
+    {
+      "path": "requirements.txt",
+      "role": "Alternative dependency list."
+    },
+    {
+      "path": "serve.py",
+      "role": "Flask API entry point, CLI configuration, env mapping, route handler, RAG orchestration."
+    },
+    {
+      "path": "rag/core.py",
+      "role": "RAG abstraction for ChromaDB, MongoDB, and Qdrant vector search."
+    },
+    {
+      "path": "semantic_router/router.py",
+      "role": "Semantic route scoring using embedding similarity."
+    },
+    {
+      "path": "semantic_router/route.py",
+      "role": "Route data container."
+    },
+    {
+      "path": "semantic_router/samples.py",
+      "role": "Vietnamese route examples for products and chitchat."
+    },
+    {
+      "path": "reflection/core.py",
+      "role": "Query rewriting from chat history to standalone Vietnamese question."
+    },
+    {
+      "path": "re_rank/core.py",
+      "role": "CrossEncoder reranker for retrieved passages."
+    },
+    {
+      "path": "embeddings/base.py",
+      "role": "Embedding config and base classes."
+    },
+    {
+      "path": "embeddings/sentenceTransformer.py",
+      "role": "Primary SentenceTransformer embedding wrapper used in runtime."
+    },
+    {
+      "path": "embeddings/fastEmbed.py",
+      "role": "FastEmbed wrapper."
+    },
+    {
+      "path": "embeddings/openai.py",
+      "role": "OpenAI embedding wrapper."
+    },
+    {
+      "path": "embeddings/google.py",
+      "role": "Google Vertex embedding wrapper."
+    },
+    {
+      "path": "embeddings/mistral.py",
+      "role": "Mistral embedding wrapper."
+    },
+    {
+      "path": "insert_data/build_chromadb.py",
+      "role": "CSV to ChromaDB ingestion utility."
+    },
+    {
+      "path": "llms/llms.py",
+      "role": "LLM facade selecting local or online adapter."
+    },
+    {
+      "path": "llms/onlinesLlms.py",
+      "role": "Gemini, OpenAI, and Together adapters."
+    },
+    {
+      "path": "llms/localLlms.py",
+      "role": "Ollama, vLLM, Hugging Face, and ONNX local adapters."
+    },
+    {
+      "path": "llms/onnx.py",
+      "role": "ONNX Runtime generation wrapper with tokenizer and KV cache handling."
+    },
+    {
+      "path": "benchmark_inference_time_pipeline.py",
+      "role": "Full pipeline latency benchmark."
+    },
+    {
+      "path": "benchmark_inference_time_llms.py",
+      "role": "LLM-only latency benchmark."
+    },
+    {
+      "path": "test/unitTest/test_rerank_ncdg.py",
+      "role": "Reranker exact match and nDCG evaluation."
+    },
+    {
+      "path": "test/integrationTest/llm-answer/test_bleu.py",
+      "role": "API answer BLEU evaluation via RAGAS."
+    },
+    {
+      "path": "test/integrationTest/llm-answer/test_rouge.py",
+      "role": "API answer ROUGE evaluation via RAGAS."
+    },
+    {
+      "path": "hoanghamobile.csv",
+      "role": "Product catalog data."
+    }
+  ],
+  "modules_layers": [
+    {
+      "name": "API and orchestration",
+      "files": [
+        "serve.py"
+      ],
+      "responsibility": "Receive chat messages, initialize dependencies, choose route, call retrieval/rerank/LLM, return assistant JSON."
+    },
+    {
+      "name": "Semantic routing",
+      "files": [
+        "semantic_router/router.py",
+        "semantic_router/route.py",
+        "semantic_router/samples.py"
+      ],
+      "responsibility": "Route rewritten Vietnamese query to products or chitchat by embedding similarity."
+    },
+    {
+      "name": "Reflection",
+      "files": [
+        "reflection/core.py"
+      ],
+      "responsibility": "Rewrite contextual chat history into a standalone Vietnamese question."
+    },
+    {
+      "name": "RAG and retrieval",
+      "files": [
+        "rag/core.py",
+        "insert_data/build_chromadb.py"
+      ],
+      "responsibility": "Embed queries, search vector stores, ingest CSV into ChromaDB."
+    },
+    {
+      "name": "Reranking",
+      "files": [
+        "re_rank/core.py"
+      ],
+      "responsibility": "Score and sort retrieved passages using CrossEncoder."
+    },
+    {
+      "name": "Embeddings",
+      "files": [
+        "embeddings/base.py",
+        "embeddings/sentenceTransformer.py",
+        "embeddings/fastEmbed.py",
+        "embeddings/openai.py",
+        "embeddings/google.py",
+        "embeddings/mistral.py"
+      ],
+      "responsibility": "Provide local and API embedding wrappers."
+    },
+    {
+      "name": "LLM adapters",
+      "files": [
+        "llms/llms.py",
+        "llms/onlinesLlms.py",
+        "llms/localLlms.py",
+        "llms/onnx.py"
+      ],
+      "responsibility": "Normalize generation across online and offline model backends."
+    },
+    {
+      "name": "Evaluation and benchmarks",
+      "files": [
+        "test/",
+        "benchmark_inference_time_llms.py",
+        "benchmark_inference_time_pipeline.py"
+      ],
+      "responsibility": "Measure retrieval, reranking, answer quality, and latency."
+    }
+  ],
+  "diagrams_source": {
+    "architecture": "flowchart TB\n  Client[Chatbot client] --> API[Flask serve.py POST /api/search]\n  API --> Reflection[Reflection standalone Vietnamese query]\n  Reflection --> Router[SemanticRouter products or chitchat]\n  Router -->|products| RAG[RAG vector_search]\n  RAG --> VectorDB[(ChromaDB MongoDB Qdrant)]\n  RAG --> Reranker[CrossEncoder Reranker]\n  Reranker --> Prompt[Sales prompt with ranked product context]\n  Prompt --> LLM[LLMs facade]\n  Router -->|chitchat| LLM\n  LLM --> Response[assistant JSON response]",
+    "module_dependency": "flowchart LR\n  Serve[serve.py] --> Semantic[semantic_router]\n  Serve --> Reflection[reflection]\n  Serve --> RAGCore[rag/core.py]\n  Serve --> Rerank[re_rank]\n  Serve --> LLMs[llms]\n  Serve --> Ingest[insert_data]\n  RAGCore --> Embeddings[embeddings]\n  RAGCore --> Stores[Vector stores]\n  RAGCore --> LLMs\n  Semantic --> Embeddings\n  LLMs --> Online[onlinesLlms.py]\n  LLMs --> Local[localLlms.py]\n  Local --> ONNX[onnx.py]\n  Tests[test and benchmark] --> Serve\n  Tests --> RAGCore\n  Tests --> Rerank\n  Tests --> LLMs",
+    "runtime_data_flow": "sequenceDiagram\n  participant C as Client\n  participant S as serve.py\n  participant RF as Reflection\n  participant RT as SemanticRouter\n  participant R as RAG\n  participant V as Vector DB\n  participant RR as Reranker\n  participant L as LLM\n  C->>S: POST /api/search messages[]\n  S->>RF: chat history\n  RF->>L: rewrite prompt\n  L-->>RF: standalone query\n  RF-->>S: query\n  S->>RT: guide(query)\n  alt products\n    S->>R: vector_search(query)\n    R->>V: query embedding\n    V-->>R: candidate docs\n    R-->>S: passages\n    S->>RR: rerank(query, passages)\n    RR-->>S: ranked passages\n    S->>L: sales prompt with context\n  else chitchat\n    S->>L: original chat messages\n  end\n  L-->>S: generated text\n  S-->>C: {content, role}",
+    "setup_flow": "flowchart TB\n  Start[Clone repo] --> Python[Python 3.12]\n  Python --> Sync[uv sync]\n  Sync --> Env[Create .env for selected LLM and DB]\n  Env --> Data{Vector DB}\n  Data -->|chromadb| CSV[Put CSV in data/]\n  Data -->|mongodb| Atlas[Create vector_index]\n  Data -->|qdrant| Qdrant[Prepare collection]\n  CSV --> Run[uv run serve.py ...]\n  Atlas --> Run\n  Qdrant --> Run\n  Run --> API[POST /api/search]"
+  },
+  "evidence_sources": {
+    "graph_tools": [
+      "CodeGraph codegraph_status",
+      "CodeGraph codegraph_context",
+      "CodeGraph codegraph_files",
+      "CodeGraph codegraph_search",
+      "CodeGraph codegraph_callees",
+      "CodeGraph codegraph_callers",
+      "Understand-Anything .understand-anything/knowledge-graph.json",
+      "Understand-Anything .understand-anything/meta.json"
+    ],
+    "docs_config_design": [
+      "README_old.md",
+      "AGENTS.md",
+      "workfollow.md",
+      "pyproject.toml",
+      "requirements.txt",
+      ".python-version",
+      "DESIGN-apple.md"
+    ],
+    "code_files": [
+      "serve.py",
+      "rag/core.py",
+      "semantic_router/router.py",
+      "semantic_router/route.py",
+      "semantic_router/samples.py",
+      "reflection/core.py",
+      "re_rank/core.py",
+      "embeddings/base.py",
+      "embeddings/sentenceTransformer.py",
+      "embeddings/fastEmbed.py",
+      "embeddings/openai.py",
+      "embeddings/google.py",
+      "embeddings/mistral.py",
+      "insert_data/build_chromadb.py",
+      "llms/llms.py",
+      "llms/onlinesLlms.py",
+      "llms/localLlms.py",
+      "llms/onnx.py",
+      "benchmark_inference_time_pipeline.py",
+      "benchmark_inference_time_llms.py"
+    ],
+    "test_files": [
+      "test/unitTest/test_api_response.py",
+      "test/unitTest/test_chromadb_vector_search.py",
+      "test/unitTest/test_reflection.py",
+      "test/unitTest/test_rerank_ncdg.py",
+      "test/unitTest/test_hit@k_mongodb.py",
+      "test/unitTest/test_hit@k_qdrant.py",
+      "test/integrationTest/llm-answer/test_bleu.py",
+      "test/integrationTest/llm-answer/test_rouge.py"
+    ],
+    "data_files_sampled": [
+      "hoanghamobile.csv",
+      "test/unitTest/hit_k_benchmark.csv",
+      "test/unitTest/rerank_flat_benchmark.csv",
+      "test/integrationTest/llm-answer/question_answer.csv",
+      "index.html"
+    ]
+  },
+  "open_questions": [
+    "Should README_old.md be renamed or copied to README.md to match pyproject.toml?",
+    "Should MongoDB env var names be DB_NAME/DB_COLLECTION as README says, or MONGODB_NAME/MONGODB_COLLECTION as code uses?",
+    "Is index.html intentionally product-spec text, or is it a malformed/static artifact?",
+    "Should AGENT.md be restored, or should Understand-Anything/workfollow references be updated to AGENTS.md?",
+    "Should production serving disable Flask debug=True and use a WSGI server?"
+  ],
+  "files_read": [
+    "DESIGN-apple.md",
+    "pyproject.toml",
+    "requirements.txt",
+    "README_old.md",
+    "workfollow.md",
+    "AGENTS.md",
+    ".python-version",
+    "serve.py",
+    "rag/core.py",
+    "semantic_router/router.py",
+    "semantic_router/route.py",
+    "semantic_router/samples.py",
+    "embeddings/base.py",
+    "embeddings/sentenceTransformer.py",
+    "embeddings/fastEmbed.py",
+    "embeddings/google.py",
+    "embeddings/openai.py",
+    "embeddings/mistral.py",
+    "insert_data/build_chromadb.py",
+    "re_rank/core.py",
+    "reflection/core.py",
+    "llms/llms.py",
+    "llms/onlinesLlms.py",
+    "llms/localLlms.py",
+    "llms/onnx.py",
+    "test/unitTest/test_api_response.py",
+    "test/unitTest/test_chromadb_vector_search.py",
+    "test/unitTest/test_reflection.py",
+    "test/unitTest/test_rerank_ncdg.py",
+    "test/integrationTest/llm-answer/test_bleu.py",
+    "test/integrationTest/llm-answer/test_rouge.py",
+    "test/unitTest/test_hit@k_mongodb.py",
+    "test/unitTest/test_hit@k_qdrant.py",
+    "benchmark_inference_time_pipeline.py",
+    "benchmark_inference_time_llms.py",
+    ".understand-anything/knowledge-graph.json",
+    ".understand-anything/meta.json",
+    "index.html",
+    "hoanghamobile.csv",
+    "test/unitTest/hit_k_benchmark.csv",
+    "test/unitTest/rerank_flat_benchmark.csv",
+    "test/integrationTest/llm-answer/question_answer.csv"
+  ],
+  "file_read_counts": {
+    "docs_config_design_files": 7,
+    "code_files": 20,
+    "test_files": 8,
+    "data_or_markup_files_sampled": 5,
+    "index_json_files": 2,
+    "total_files_read_or_sampled": 42
+  },
+  "confidence_risk_notes": {
+    "confidence": "Medium-high for architecture, request flow, module responsibilities, and dependency map because CodeGraph and Understand-Anything agree and the relevant entry/key files were read.",
+    "not_executed": "No dependency install, app start, runtime tests, model loading, API calls, or benchmark runs were executed.",
+    "risks": [
+      "Tests are integration-heavy and may require network, credentials, local services, model downloads, or GPU/CPU memory.",
+      "README and code disagree on some MongoDB environment variable names.",
+      "RAG collection existence checks appear to reference method objects without calling them in some places.",
+      "Chroma ingestion has a likely typo around combined_information column handling.",
+      "Flask debug=True is not production-ready.",
+      "Worktree already had unrelated changes before report generation: AGENT.md deleted, AGENTS.md/DESIGN-apple.md/workfollow.md untracked."
+    ]
+  }
+}
